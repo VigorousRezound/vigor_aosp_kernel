@@ -55,8 +55,10 @@ config ZRAM_LZO
 	bool "LZO compression"
 	select LZO_COMPRESS
 	select LZO_DECOMPRESS
+
 config ZRAM_SNAPPY
 	bool "Snappy compression"
 	depends on SNAPPY_COMPRESS
 	depends on SNAPPY_DECOMPRESS
+
 endchoice
