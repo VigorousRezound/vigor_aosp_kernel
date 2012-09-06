@@ -21,9 +21,9 @@
 #include <linux/cpu.h>
 
 #define DEF_TEMP_SENSOR      0
-#define DEF_THERMAL_CHECK_MS 1250
-#define DEF_ALLOWED_MAX_HIGH 75
-#define DEF_ALLOWED_MAX_FREQ 810000
+#define DEF_THERMAL_CHECK_MS 1000
+#define DEF_ALLOWED_MAX_HIGH 50
+#define DEF_ALLOWED_MAX_FREQ 1296000
 
 static int enabled;
 static int allowed_max_high = DEF_ALLOWED_MAX_HIGH;
@@ -92,10 +92,10 @@ static void check_temp(struct work_struct *work)
 				max_freq = allowed_max_freq;
 				thermal_throttled = 1;
 				pr_warn("Thermal Throttled! Set max freq to: \
-					 %u\n", max_freq);
+						%u\n", max_freq);
 			} else {
 				pr_debug("msm_thermal: policy max for cpu %d "
-					 "already < allowed_max_freq\n", cpu);
+						"already < allowed_max_freq\n", cpu);
 			}
 		} else if (temp < allowed_max_low && thermal_throttled) {
 			if (cpu_policy->max < cpu_policy->cpuinfo.max_freq) {
@@ -149,7 +149,7 @@ static void disable_msm_thermal(void)
 	}
 }
 
-static int set_enabled(const char *val, const struct kernel_param *kp)
+static int set_enabled(const char *val, struct kernel_param *kp)
 {
 	int ret = 0;
 
@@ -164,12 +164,7 @@ static int set_enabled(const char *val, const struct kernel_param *kp)
 	return ret;
 }
 
-static struct kernel_param_ops module_ops = {
-	.set = set_enabled,
-	.get = param_get_bool,
-};
-
-module_param_cb(enabled, &module_ops, &enabled, 0644);
+module_param_call(enabled, set_enabled, param_get_bool, &enabled, 0644);
 MODULE_PARM_DESC(enabled, "enforce thermal limit on cpu");
 
 static int __init msm_thermal_init(void)
