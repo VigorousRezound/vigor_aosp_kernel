@@ -1,6 +1,7 @@
 #
 # Makefile for the linux kernel.
 #
+CFLAGS_workqueue.o += -O2
 
 CFLAGS_workqueue.o += -O2
 
