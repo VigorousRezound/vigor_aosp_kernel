@@ -2563,6 +2563,7 @@ static int atmel_224e_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 static int atmel_224e_ts_resume(struct i2c_client *client)
 {
 	struct atmel_ts_data *ts = i2c_get_clientdata(client);
+	int ret;
 #ifdef CONFIG_TOUCHSCREEN_ATMEL_SWEEP2WAKE
         if (s2w_switch > 0) {
                 //screen on, disable_irq_wake
