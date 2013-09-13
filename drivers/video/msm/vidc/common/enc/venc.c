@@ -37,6 +37,7 @@
 #define VID_ENC_NAME	"msm_vidc_enc"
 static char *node_name[2] = {"", "_sec"};
 
+
 #if DEBUG
 #define DBG(x...) printk(KERN_DEBUG x)
 #else
@@ -517,7 +518,7 @@ static int vid_enc_open_client(struct video_client_ctx **vid_clnt_ctx,
 {
 	s32 client_index;
 	struct video_client_ctx *client_ctx;
-	int rc = 0;
+	int rc = VCD_ERR_FAIL;
 	u8 client_count = 0;
 
 	INFO("\n msm_vidc_enc: Inside %s()", __func__);

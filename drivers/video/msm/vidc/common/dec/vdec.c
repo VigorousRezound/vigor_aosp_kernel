@@ -1264,7 +1264,6 @@ static u32 vid_dec_fill_output_buffer(struct video_client_ctx *client_ctx,
 	struct file *file;
 	s32 buffer_index = -1;
 	u32 vcd_status = VCD_ERR_FAIL;
-
 	struct vcd_frame_data vcd_frame;
 
 	if (!client_ctx || !fill_buffer_cmd)
@@ -2097,7 +2096,6 @@ static int vid_dec_open_secure(struct inode *inode, struct file *file)
 		rc = -ENOMEM;
 		goto error;
 	}
-
 	file->private_data = client_ctx;
 	if (res_trk_open_secure_session()) {
 		ERR("Secure session operation failure\n");
@@ -2126,7 +2124,6 @@ static int vid_dec_open(struct inode *inode, struct file *file)
 		mutex_unlock(&vid_dec_device_p->lock);
 		return -ENOMEM;
 	}
-
 	file->private_data = client_ctx;
 	mutex_unlock(&vid_dec_device_p->lock);
 	return rc;
@@ -2136,7 +2133,7 @@ static int vid_dec_release_secure(struct inode *inode, struct file *file)
 {
 	struct video_client_ctx *client_ctx = file->private_data;
 
-	INFO("msm_vidc_dec: Inside %s()", __func__);
+	DBG("msm_vidc_dec: Inside %s()", __func__);
 	vidc_cleanup_addr_table(client_ctx, BUFFER_TYPE_OUTPUT);
 	vidc_cleanup_addr_table(client_ctx, BUFFER_TYPE_INPUT);
 	vid_dec_close_client(client_ctx);
@@ -2144,7 +2141,7 @@ static int vid_dec_release_secure(struct inode *inode, struct file *file)
 #ifndef USE_RES_TRACKER
 	vidc_disable_clk();
 #endif
-	INFO("msm_vidc_dec: Return from %s()", __func__);
+	DBG("msm_vidc_dec: Return from %s()", __func__);
 	return 0;
 }
 
@@ -2317,7 +2314,7 @@ error_vid_dec_alloc_chrdev_region:
 static void __exit vid_dec_exit(void)
 {
 	int i = 0;
-	INFO("msm_vidc_dec: Inside %s()", __func__);
+	DBG("msm_vidc_dec: Inside %s()", __func__);
 	for (i = 0; i < NUM_OF_DRIVER_NODES; i++)
 		cdev_del(&(vid_dec_device_p->cdev[i]));
 	device_destroy(vid_dec_class, vid_dec_dev_num);
