@@ -22,9 +22,7 @@
 #include <linux/rtnetlink.h>
 #include <linux/interrupt.h>
 #include <linux/spinlock.h>
-#ifdef CONFIG_DEBUG_FS
 #include <linux/debugfs.h>
-#endif
 
 #include <crypto/ctr.h>
 #include <crypto/des.h>
@@ -73,9 +71,7 @@ struct crypto_stat {
 	u32 sha_hmac_op_fail;
 };
 static struct crypto_stat _qcrypto_stat[MAX_CRYPTO_DEVICE];
-#ifdef CONFIG_DEBUG_FS
 static struct dentry *_debug_dent;
-#endif
 static char _debug_read_buf[DEBUG_MAX_RW_BUF];
 
 struct crypto_priv {
@@ -3183,9 +3179,7 @@ static struct platform_driver _qualcomm_crypto = {
 	},
 };
 
-#ifdef CONFIG_DEBUG_FS
 static int _debug_qcrypto[MAX_CRYPTO_DEVICE];
-#endif
 
 static int _debug_stats_open(struct inode *inode, struct file *file)
 {
@@ -3224,7 +3218,6 @@ static const struct file_operations _debug_stats_ops = {
 	.write =        _debug_stats_write,
 };
 
-#ifdef CONFIG_DEBUG_FS
 static int _qcrypto_debug_init(void)
 {
 	int rc;
@@ -3256,17 +3249,14 @@ err:
 	debugfs_remove_recursive(_debug_dent);
 	return rc;
 }
-#endif
 
 static int __init _qcrypto_init(void)
 {
-#ifdef CONFIG_DEBUG_FS
 	int rc;
 
 	rc = _qcrypto_debug_init();
 	if (rc)
 		return rc;
-#endif
 
 	return platform_driver_register(&_qualcomm_crypto);
 }
@@ -3274,9 +3264,7 @@ static int __init _qcrypto_init(void)
 static void __exit _qcrypto_exit(void)
 {
 	pr_debug("%s Unregister QCRYPTO\n", __func__);
-#ifdef CONFIG_DEBUG_FS
 	debugfs_remove_recursive(_debug_dent);
-#endif
 	platform_driver_unregister(&_qualcomm_crypto);
 }
 
