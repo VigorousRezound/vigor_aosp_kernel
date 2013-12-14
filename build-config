@@ -1,3 +1,4 @@
+#Added CWM compatibility on 11/9
 TOOLCHAINDIR=~/toolchain
 
 TOOLCHAIN=sabermod-4.8
@@ -45,7 +46,7 @@ PHONE='HTC Rezound'
 
 N_CORES=8
 NAME=FunkyBean
-VERNUMR=-v4.0.3
+VERNUMR=-v4.2
 VERSION=$NAME$VERNUMR
 
 # ----
