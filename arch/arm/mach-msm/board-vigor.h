@@ -24,6 +24,76 @@
 #define MSM_RAM_CONSOLE_BASE	MSM_HTC_RAM_CONSOLE_PHYS
 #define MSM_RAM_CONSOLE_SIZE	MSM_HTC_RAM_CONSOLE_SIZE
 
+#ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
+/* prim = 1280 x 720 x 4(bpp) x 3(pages) */
+#define MSM_FB_PRIM_BUF_SIZE	0xA8C000
+#else
+/* prim = 1280 x 720 x 4(bpp) x 2(pages) */
+#define MSM_FB_PRIM_BUF_SIZE	0x708000
+#endif
+
+#ifdef CONFIG_FB_MSM_OVERLAY_WRITEBACK
+/* 1280 x 720 x 3(bpp) x 2(pages) frame buffer */
+#define MSM_FB_WRITEBACK_SIZE	0x546000
+#else
+#define MSM_FB_WRITEBACK_SIZE	0
+#endif
+
+#ifdef CONFIG_FB_MSM_HDMI_MSM_PANEL
+/* prim = 1024 x 600 x 4(bpp) x 2(pages)
+ * hdmi = 1920 x 1080 x 2(bpp) x 1(page)
+ * Note: must be multiple of 4096 */
+#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x3F4800 + MSM_FB_WRITEBACK_SIZE, 4096)
+#elif defined(CONFIG_FB_MSM_TVOUT)
+/* prim = 1024 x 600 x 4(bpp) x 2(pages)
+ * tvout = 720 x 576 x 2(bpp) x 2(pages)
+ * Note: must be multiple of 4096 */
+#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x195000 + MSM_FB_DSUB_PMEM_ADDER, 4096)
+#else /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
+#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x313800 + MSM_FB_DSUB_PMEM_ADDER, 4096)
+#endif /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
+/*** Memory map ***/
+#define MSM_ION_HEAP_NUM 4
+
+// PMEM SMI
+#define MSM_SMI_SIZE 0x4000000
+#define KERNEL_SMI_SIZE 0x700000
+#define USER_SMI_SIZE (MSM_SMI_SIZE - KERNEL_SMI_SIZE)
+#define MSM_PMEM_SMIPOOL_SIZE USER_SMI_SIZE
+
+// PMEM
+#define MSM_PMEM_AUDIO_SIZE 0x239000
+#define MSM_PMEM_ADSP_SIZE 0x1800000
+
+// ION SMI
+#define MSM_ION_MM_SIZE 0x2C00000
+#define MSM_SMI_ION_SIZE 0x3000000
+
+// ION
+#define MSM_ION_WB_SIZE 0x2FD000
+#define MSM_ION_SF_SIZE 0x2800000
+
+// Base addresses
+#define MSM_SMI_BASE (0x38000000)
+#define KERNEL_SMI_BASE (MSM_SMI_BASE)
+#define USER_SMI_BASE (KERNEL_SMI_BASE + KERNEL_SMI_SIZE)
+#define MSM_PMEM_SMIPOOL_BASE USER_SMI_BASE
+#define MSM_ION_MM_BASE (0x40400000)
+#define MSM_SMI_ION_BASE (0x40400000)
+#define MSM_ION_WB_BASE (0x45C00000)
+#define MSM_PMEM_AUDIO_BASE (MSM_PMEM_ADSP_BASE + MSM_PMEM_ADSP_SIZE)
+#define MSM_ION_SF_BASE (0x40400000)
+#define MSM_PMEM_ADSP_BASE (0x40400000)
+
+/* PHY_BASE_ADDR1 should be 8 MB alignment */
+/* 0x48000000~0x48700000 is reserved for Vigor 8K AMSS */
+#define PHY_BASE_ADDR1  0x48800000
+/* 0x40400000~0x42A00000 is 38MB for SF/AUDIO/FB PMEM */
+/* 0x48800000~0x7CC00000 is 836MB for APP */
+/* 0x7CC00000~0x80000000 is 52MB for ADSP PMEM */
+#define SIZE_ADDR1	  0x30400000
+/*** END Memory map ***/
+
 /* GPIO definition */
 #define PMGPIO(x)	(x-1)
 

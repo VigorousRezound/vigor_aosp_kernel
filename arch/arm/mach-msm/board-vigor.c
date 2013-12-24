@@ -3038,70 +3038,6 @@ static void __init msm8x60_init_dsps(void)
 }
 #endif /* CONFIG_MSM_DSPS */
 
-#ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
-/* prim = 1280 x 720 x 4(bpp) x 3(pages) */
-#define MSM_FB_PRIM_BUF_SIZE	0xA8C000
-#else
-/* prim = 1280 x 720 x 4(bpp) x 2(pages) */
-#define MSM_FB_PRIM_BUF_SIZE	0x708000
-#endif
-
-#ifdef CONFIG_FB_MSM_OVERLAY_WRITEBACK
-/* 1280 x 720 x 3(bpp) x 2(pages) frame buffer */
-#define MSM_FB_WRITEBACK_SIZE	0x546000
-#else
-#define MSM_FB_WRITEBACK_SIZE	0
-#endif
-
-#ifdef CONFIG_FB_MSM_HDMI_MSM_PANEL
-/* prim = 1024 x 600 x 4(bpp) x 2(pages)
- * hdmi = 1920 x 1080 x 2(bpp) x 1(page)
- * Note: must be multiple of 4096 */
-#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x3F4800 + MSM_FB_WRITEBACK_SIZE, 4096)
-#elif defined(CONFIG_FB_MSM_TVOUT)
-/* prim = 1024 x 600 x 4(bpp) x 2(pages)
- * tvout = 720 x 576 x 2(bpp) x 2(pages)
- * Note: must be multiple of 4096 */
-#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x195000 + MSM_FB_DSUB_PMEM_ADDER, 4096)
-#else /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
-#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x313800 + MSM_FB_DSUB_PMEM_ADDER, 4096)
-#endif /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
-
-/* PMEM Memory map  */
-#define MSM_PMEM_ADSP_SIZE      0x2C00000
-#define MSM_PMEM_AUDIO_SIZE     0x239000 /* 2MB  */
-
-#define MSM_PMEM_ADSP_BASE      0x40400000
-#define MSM_PMEM_AUDIO_BASE     (MSM_PMEM_ADSP_BASE + MSM_PMEM_ADSP_SIZE)
-/* End PMEM */
-
-/* ION Memory map */
-#define MSM_ION_HEAP_NUM        3
-
-#define MSM_ION_SF_SIZE         0x3600000 /* 54 MB */
-#define MSM_ION_WB_SIZE         0x2FD000 /* 30MB  */
-
-#define MSM_ION_SF_BASE         0x40400000 /* 100 MB */
-#define MSM_ION_WB_BASE         0x45C00000
-/* End ION */
-
-#define MSM_SMI_BASE				0x38000000
-#define MSM_SMI_SIZE				0x4000000
-
-/* Kernel SMI PMEM Region for video core, used for Firmware */
-/* and encoder, decoder scratch buffers */
-/* Kernel SMI PMEM Region Should always precede the user space */
-/* SMI PMEM Region, as the video core will use offset address */
-/* from the Firmware base */
-#define KERNEL_SMI_BASE			 (MSM_SMI_BASE)
-#define KERNEL_SMI_SIZE			 0x700000
-
-/* User space SMI PMEM Region for video core*/
-/* used for encoder, decoder input & output buffers  */
-#define USER_SMI_BASE			   (KERNEL_SMI_BASE + KERNEL_SMI_SIZE)
-#define USER_SMI_SIZE			   (MSM_SMI_SIZE - KERNEL_SMI_SIZE)
-#define MSM_PMEM_SMIPOOL_BASE	   USER_SMI_BASE
-#define MSM_PMEM_SMIPOOL_SIZE	   USER_SMI_SIZE
 
 static unsigned fb_size;
 static int __init fb_size_setup(char *p)
@@ -3198,22 +3134,6 @@ void *pmem_setup_smi_region(void)
         return (void *)msm_bus_scale_register_client(&smi_client_pdata);
 }
 
-int request_smi_region(void *data)
-{
-        int bus_id = (int) data;
-
-        msm_bus_scale_client_update_request(bus_id, 1);
-        return 0;
-}
-
-int release_smi_region(void *data)
-{
-        int bus_id = (int) data;
-
-        msm_bus_scale_client_update_request(bus_id, 0);
-        return 0;
-}
-
 static struct android_pmem_platform_data android_pmem_smipool_pdata = {
 	.name = "pmem_smipool",
 	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
@@ -3234,6 +3154,28 @@ static struct platform_device android_pmem_smipool_device = {
 
 #ifdef CONFIG_ION_MSM
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
+static int request_smi_region(void *data)
+{
+  pmem_request_smi_region(data);
+
+  return 0;
+}
+
+static int release_smi_region(void *data)
+{
+  pmem_release_smi_region(data);
+
+  return 0;
+}
+
+static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
+  .permission_type = IPT_TYPE_MM_CARVEOUT,
+  .align = PAGE_SIZE,
+  .request_region = request_smi_region,
+  .release_region = release_smi_region,
+  .setup_region = pmem_setup_smi_region,
+};
+
 static struct ion_co_heap_pdata co_ion_pdata = {
   .adjacent_mem_id = INVALID_HEAP_ID,
   .align = PAGE_SIZE,
@@ -3258,17 +3200,24 @@ static struct ion_platform_data ion_pdata = {
                         .type        = ION_HEAP_TYPE_SYSTEM,
                         .name        = ION_VMALLOC_HEAP_NAME,
                 },
-#ifndef CONFIG_MSM_IOMMU
                 {
+						.id  = ION_CP_MM_HEAP_ID,
+						.type  = ION_HEAP_TYPE_CP,
+						.name  = ION_MM_HEAP_NAME,
+						.base  = MSM_ION_MM_BASE,
+					    .size  = MSM_ION_MM_SIZE,
+						.memory_type = ION_SMI_TYPE,
+						.extra_data = (void *) &cp_mm_ion_pdata,
+						},
+						{
                         .id        = ION_SF_HEAP_ID,
                         .type        = ION_HEAP_TYPE_CARVEOUT,
                         .name        = ION_SF_HEAP_NAME,
-                    //    .base   = MSM_ION_SF_BASE,
+                        .base   = MSM_ION_SF_BASE,
                         .size        = MSM_ION_SF_SIZE,
                         .memory_type = ION_EBI_TYPE,
                         .extra_data = (void *)&co_ion_pdata,
                 },
-#endif
                 {
                         .id        = ION_CP_WB_HEAP_ID,
                         .type        = ION_HEAP_TYPE_CP,
@@ -7671,6 +7620,11 @@ static struct memtype_reserve msm8x60_reserve_table[] __initdata = {
 		.limit	=	USER_SMI_SIZE,
 		.flags	=	MEMTYPE_FLAGS_FIXED,
 	},
+	 [MEMTYPE_SMI_ION] = {
+		.start  =  MSM_SMI_ION_BASE,
+		.limit  =  MSM_SMI_ION_SIZE,
+		.flags  =  MEMTYPE_FLAGS_FIXED,
+	},
 	[MEMTYPE_EBI0] = {
 		.flags	=	MEMTYPE_FLAGS_1M_ALIGN,
 	},
@@ -7719,6 +7673,7 @@ static void __init reserve_ion_memory(void)
 {
 #if defined(CONFIG_ION_MSM) && defined(CONFIG_MSM_MULTIMEDIA_USE_ION)
         msm8x60_reserve_table[MEMTYPE_EBI1].size += MSM_ION_SF_SIZE;
+		msm8x60_reserve_table[MEMTYPE_SMI_ION].size += MSM_ION_MM_SIZE;
 #endif
 }
 
@@ -8052,14 +8007,6 @@ static void __init vigor_init(void)
 	msm8x60_init(&htc_vigor_board_data);
 	printk(KERN_INFO "%s revision=%d engineerid=%d\n", __func__, system_rev, engineerid);
 }
-
-/* PHY_BASE_ADDR1 should be 8 MB alignment */
-/* 0x48000000~0x48700000 is reserved for Vigor 8K AMSS */
-#define PHY_BASE_ADDR1  0x48800000
-/* 0x40400000~0x42A00000 is 38MB for SF/AUDIO/FB PMEM */
-/* 0x48800000~0x7CC00000 is 836MB for APP */
-/* 0x7CC00000~0x80000000 is 52MB for ADSP PMEM */
-#define SIZE_ADDR1	  0x30400000
 
 static void __init vigor_fixup(struct machine_desc *desc, struct tag *tags,
 				 char **cmdline, struct meminfo *mi)

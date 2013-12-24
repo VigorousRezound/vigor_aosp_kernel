@@ -28,6 +28,8 @@
 #define PIL_FW_BASE_ADDR 0xafe00000
 #define PIL_FW_SIZE 0x200000
 
+static bool is_encoding = false;
+
 static unsigned int vidc_clk_table[4] = {
 	48000000, 133330000, 200000000, 228570000,
 };
@@ -704,13 +706,7 @@ void res_trk_init(struct device *device, u32 irq)
 		resource_context.vidc_platform_data =
 			(struct msm_vidc_platform_data *) device->platform_data;
 		if (resource_context.vidc_platform_data) {
-			resource_context.memtype =
-			resource_context.vidc_platform_data->memtype;
-			resource_context.fw_mem_type =
-			resource_context.vidc_platform_data->memtype;
-			resource_context.cmd_mem_type =
-			resource_context.vidc_platform_data->memtype;
-			if (resource_context.vidc_platform_data->enable_ion) {
+			if (res_trk_get_enable_ion()) {
 				resource_context.res_ion_client =
 					res_trk_create_ion_client();
 				if (!(resource_context.res_ion_client)) {
@@ -718,10 +714,6 @@ void res_trk_init(struct device *device, u32 irq)
 							__func__);
 					return;
 				}
-				resource_context.fw_mem_type =
-				ION_MM_FIRMWARE_HEAP_ID;
-				resource_context.cmd_mem_type =
-				ION_CP_MFC_HEAP_ID;
 			}
 			resource_context.disable_dmx =
 			resource_context.vidc_platform_data->disable_dmx;
@@ -804,31 +796,25 @@ int res_trk_get_mem_type(void)
 	int mem_type = -1;
 	switch (resource_context.res_mem_type) {
 	case DDL_FW_MEM:
-		mem_type = ION_HEAP(resource_context.fw_mem_type);
+		if (res_trk_get_enable_ion())
+			mem_type = ION_HEAP(ION_CP_MM_HEAP_ID);
+		else
+			mem_type = MEMTYPE_SMI_KERNEL;
 		return mem_type;
 	case DDL_MM_MEM:
-		mem_type = resource_context.memtype;
+		if (res_trk_get_enable_ion())
+			mem_type = ION_HEAP(ION_CP_MM_HEAP_ID);
+		else
+			mem_type = MEMTYPE_SMI_KERNEL;
 		break;
 	case DDL_CMD_MEM:
-		if (res_trk_check_for_sec_session())
-			mem_type = resource_context.cmd_mem_type;
+		if (res_trk_check_for_sec_session() && res_trk_get_enable_ion())
+			mem_type = ION_HEAP(ION_CP_MM_HEAP_ID);
 		else
-			mem_type = resource_context.memtype;
+			mem_type = MEMTYPE_SMI_KERNEL;
 		break;
 	default:
 		return mem_type;
-	}
-	if (resource_context.vidc_platform_data->enable_ion) {
-		if (res_trk_check_for_sec_session()) {
-         mem_type = ION_HEAP(mem_type);
-         if(resource_context.res_mem_type != DDL_FW_MEM)
-            mem_type |= ION_SECURE;
-         else if (res_trk_is_cp_enabled())
-            mem_type |= ION_SECURE;
-      }
-		else
-			mem_type = (ION_HEAP(mem_type) |
-					ION_HEAP(ION_IOMMU_HEAP_ID));
 	}
 	return mem_type;
 }
@@ -843,7 +829,7 @@ u32 res_trk_is_cp_enabled(void)
 
 u32 res_trk_get_enable_ion(void)
 {
-	if (resource_context.vidc_platform_data->enable_ion)
+	if (resource_context.vidc_platform_data->enable_ion && !is_encoding)
 		return 1;
 	else
 		return 0;
@@ -1002,4 +988,9 @@ u32 get_res_trk_perf_level(enum vcd_perf_level perf_level)
 		res_trk_perf_level = -EINVAL;
 	}
 	return res_trk_perf_level;
+}
+
+void res_trk_set_is_encoding(bool encoding)
+{
+  is_encoding = encoding;
 }
