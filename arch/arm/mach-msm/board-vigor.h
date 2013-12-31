@@ -53,38 +53,62 @@
 #define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x313800 + MSM_FB_DSUB_PMEM_ADDER, 4096)
 #endif /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
 
-/*** Memory map ***/
-#define MSM_ION_HEAP_NUM 4
+/* Kernel SMI PMEM Region for video core, used for Firmware */
+/* and encoder,decoder scratch buffers */
+/* Kernel SMI PMEM Region Should always precede the user space */
+/* SMI PMEM Region, as the video core will use offset address */
+/* from the Firmware base */
+#define KERNEL_SMI_BASE (MSM_SMI_BASE)
+#define KERNEL_SMI_SIZE 0x400000
 
-// PMEM SMI
+#define MSM_SMI_BASE 0x38000000
 #define MSM_SMI_SIZE 0x4000000
-#define KERNEL_SMI_SIZE 0x600000
+
+/* User space SMI PMEM Region for video core*/
+/* used for encoder, decoder input & output buffers */
+#define USER_SMI_BASE (KERNEL_SMI_BASE + KERNEL_SMI_SIZE)
 #define USER_SMI_SIZE (MSM_SMI_SIZE - KERNEL_SMI_SIZE)
+#define MSM_PMEM_SMIPOOL_BASE USER_SMI_BASE
 #define MSM_PMEM_SMIPOOL_SIZE USER_SMI_SIZE
 
-// PMEM
-#define MSM_PMEM_AUDIO_SIZE 0x239000 /* 2.2MB */
-#define MSM_PMEM_ADSP_SIZE 0x2C00000 /* 44MB */
+/* PMEM memory map */
+#define MSM_PMEM_ADSP_SIZE 0x1800000
+#define MSM_PMEM_AUDIO_SIZE 0x239000
 
-// ION SMI
-#define MSM_ION_MM_SIZE 0x2C00000 /* 44MB */
-#define MSM_SMI_ION_SIZE 0x3000000 /* 48MB */
+#define MSM_PMEM_ADSP_BASE (0x80000000 - MSM_PMEM_ADSP_SIZE)
+#define MSM_PMEM_AUDIO_BASE (0x46400000)
 
-// ION
-#define MSM_ION_WB_SIZE 0x2FD000 /* 3MB */
-#define MSM_ION_SF_SIZE 0x2800000 /* 40MB */
+/* ION memory map */
+#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
+#define MSM_ION_MM_SIZE 0x2D00000
+#define MSM_ION_SF_SIZE 0x2800000
+#define MSM_ION_WB_SIZE 0x2FD000
+#define MSM_SMI_ION_SIZE 0x3000000
 
-// Base addresses
-#define MSM_SMI_BASE (0x38000000)
-#define KERNEL_SMI_BASE (MSM_SMI_BASE)
-#define USER_SMI_BASE (KERNEL_SMI_BASE + KERNEL_SMI_SIZE)
-#define MSM_PMEM_SMIPOOL_BASE USER_SMI_BASE
-#define MSM_ION_MM_BASE (0x40400000)
-#define MSM_SMI_ION_BASE (0x7CC00000 - MSM_SMI_ION_SIZE)
-#define MSM_ION_WB_BASE (0x80000000 - MSM_ION_WB_SIZE)
-#define MSM_PMEM_AUDIO_BASE (0x7CC00000)
-#define MSM_ION_SF_BASE (0x40400000)
-#define MSM_PMEM_ADSP_BASE (MSM_PMEM_AUDIO_BASE + MSM_PMEM_AUDIO_SIZE)
+#define MSM_ION_SF_BASE 0x7C600000
+#define MSM_SMI_ION_BASE 0x40400000
+#define MSM_ION_MM_BASE 0x40400000
+
+#ifdef CONFIG_TZCOM
+#define MSM_ION_QSECOM_SIZE 0x600000
+#ifdef CONFIG_MSM_IOMMU
+#define MSM_ION_HEAP_NUM 4
+#else
+#define MSM_ION_HEAP_NUM 5
+#endif
+#else
+#ifdef CONFIG_MSM_IOMMU
+#define MSM_ION_HEAP_NUM 3
+#else
+#define MSM_ION_HEAP_NUM 4
+#endif
+#endif
+
+#define MSM_ION_WB_BASE (0x46400000)
+
+#else
+#define MSM_ION_HEAP_NUM 4
+#endif
 
 /* PHY_BASE_ADDR1 should be 8 MB alignment */
 /* 0x48000000~0x48700000 is reserved for Vigor 8K AMSS */

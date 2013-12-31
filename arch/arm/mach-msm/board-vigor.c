@@ -3152,28 +3152,34 @@ static struct platform_device android_pmem_smipool_device = {
 };
 #endif	/* CONFIG_ANDROID_PMEM */
 
-#ifdef CONFIG_ION_MSM
-#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
+
 static int request_smi_region(void *data)
 {
-  pmem_request_smi_region(data);
-
+  int bus_id = (int) data;
+  msm_bus_scale_client_update_request(bus_id, 1);
   return 0;
 }
 
 static int release_smi_region(void *data)
 {
-  pmem_release_smi_region(data);
-
+  int bus_id = (int) data;
+  msm_bus_scale_client_update_request(bus_id, 0);
   return 0;
 }
 
+void *setup_smi_region(void)
+{
+  return (void *)msm_bus_scale_register_client(&smi_client_pdata);
+}
+
+#ifdef CONFIG_ION_MSM
+#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
   .permission_type = IPT_TYPE_MM_CARVEOUT,
   .align = PAGE_SIZE,
   .request_region = request_smi_region,
   .release_region = release_smi_region,
-  .setup_region = pmem_setup_smi_region,
+  .setup_region = setup_smi_region,
 };
 
 static struct ion_co_heap_pdata co_ion_pdata = {
@@ -3185,7 +3191,6 @@ static struct ion_cp_heap_pdata cp_wb_ion_pdata = {
         .permission_type = IPT_TYPE_MDP_WRITEBACK,
         .align = PAGE_SIZE,
 };
-#endif
 #endif
 
 /*
@@ -3227,6 +3232,7 @@ static struct ion_platform_data ion_pdata = {
                         .memory_type = ION_EBI_TYPE,
                         .extra_data = (void *) &cp_wb_ion_pdata,
                 },
+#endif
         }
 };
 
@@ -7685,7 +7691,7 @@ static void __init msm8x60_calculate_reserve_sizes(void)
 
 static int msm8x60_paddr_to_memtype(phys_addr_t paddr)
 {
-	if (paddr >= 0x40000000 && paddr < 0x60000000)
+	if (paddr >= 0x40000000 && paddr < 0x80000000)
 		return MEMTYPE_EBI1;
 	if (paddr >= 0x38000000 && paddr < 0x40000000)
 		return MEMTYPE_SMI;
