@@ -31,11 +31,9 @@
 #endif
 
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
-/* prim = 1280 x 720 x 4(bpp) x 3(pages) */
-#define MSM_FB_PRIM_BUF_SIZE	0xA8C000
+#define MSM_FB_PRIM_BUF_SIZE	(1280 * 720 * 4 * 3) /* 4 bpp x 3 pages */
 #else
-/* prim = 1280 x 720 x 4(bpp) x 2(pages) */
-#define MSM_FB_PRIM_BUF_SIZE	0x708000
+#define MSM_FB_PRIM_BUF_SIZE	(1280 * 720 * 4 * 2) /* 4 bpp x 2 pages */
 #endif
 
 #ifdef CONFIG_FB_MSM_OVERLAY_WRITEBACK
@@ -56,7 +54,8 @@
 * Note: must be multiple of 4096 */
 #define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x195000 + MSM_FB_DSUB_PMEM_ADDER, 4096)
 #else /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
-#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x313800 + MSM_FB_DSUB_PMEM_ADDER, 4096)
+#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x3F4800 + MSM_FB_WRITEBACK_SIZE, 4096)
+/*#define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x313800 + MSM_FB_DSUB_PMEM_ADDER, 4096) */
 #endif /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
 
 /*** Memory map ***/

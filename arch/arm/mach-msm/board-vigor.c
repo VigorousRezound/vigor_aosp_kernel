@@ -5036,7 +5036,7 @@ static int pm8058_gpios_init(void)
 
 static struct pm8xxx_vibrator_platform_data pm8058_vib_pdata = {
        .initial_vibrate_ms  = 0,
-       .level_mV = 3000,
+       .level_mV = 2500,
        .max_timeout_ms = 15000,
 };
 
@@ -7989,9 +7989,6 @@ static void __init msm8x60_init(struct msm_board_data *board_data)
 		config_gpio_table(gpio_init_for_power_table, ARRAY_SIZE(gpio_init_for_power_table));
 	else
 		config_gpio_table(gpio_init_for_power_table_xa, ARRAY_SIZE(gpio_init_for_power_table_xa));
-
-	htc_monitor_init();
-	htc_PM_monitor_init();
 
 	rc = msm_sdcc_vreg_init_reg(&vreg_sdcc_vddp);
 	if (rc < 0)
