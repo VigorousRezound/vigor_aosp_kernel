@@ -31,11 +31,9 @@
 #endif
 
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
-/* prim = 1280 x 720 x 4(bpp) x 3(pages) */
-#define MSM_FB_PRIM_BUF_SIZE	0xA8C000
+#define MSM_FB_PRIM_BUF_SIZE	(1280 * 720 * 4 * 3) /* 4 bpp x 3 pages */
 #else
-/* prim = 1280 x 720 x 4(bpp) x 2(pages) */
-#define MSM_FB_PRIM_BUF_SIZE	0x708000
+#define MSM_FB_PRIM_BUF_SIZE	(1280 * 720 * 4 * 2) /* 4 bpp x 2 pages */
 #endif
 
 #ifdef CONFIG_FB_MSM_OVERLAY_WRITEBACK
