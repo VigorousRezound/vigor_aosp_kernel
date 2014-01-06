@@ -7990,9 +7990,6 @@ static void __init msm8x60_init(struct msm_board_data *board_data)
 	else
 		config_gpio_table(gpio_init_for_power_table_xa, ARRAY_SIZE(gpio_init_for_power_table_xa));
 
-	htc_monitor_init();
-	htc_PM_monitor_init();
-
 	rc = msm_sdcc_vreg_init_reg(&vreg_sdcc_vddp);
 	if (rc < 0)
 	printk(KERN_ERR "[HS_BOARD]Init sddc vddp power failed\n");
