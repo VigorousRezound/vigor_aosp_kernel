@@ -3052,8 +3052,8 @@ static unsigned pmem_adsp_size = MSM_PMEM_ADSP_SIZE;
 
 static int __init pmem_adsp_size_setup(char *p)
 {
-	pmem_adsp_size = memparse(p, NULL);
-	return 0;
+        pmem_adsp_size = memparse(p, NULL);
+        return 0;
 }
 early_param("pmem_adsp_size", pmem_adsp_size_setup);
 
@@ -3061,72 +3061,80 @@ static unsigned pmem_audio_size = MSM_PMEM_AUDIO_SIZE;
 
 static int __init pmem_audio_size_setup(char *p)
 {
-	pmem_audio_size = memparse(p, NULL);
-	return 0;
+        pmem_audio_size = memparse(p, NULL);
+        return 0;
 }
 early_param("pmem_audio_size", pmem_audio_size_setup);
 #endif
 
+static struct resource msm_fb_resources[] = {
+        {
+                .flags = IORESOURCE_DMA,
+        },
+        /* for overlay write back operation */
+        {
+                .flags = IORESOURCE_DMA,
+        },
+};
+
 #ifdef CONFIG_ANDROID_PMEM
 static struct android_pmem_platform_data android_pmem_adsp_pdata = {
-	.name = "pmem_adsp",
-	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
-	.cached = 1,
-	.memory_type = MEMTYPE_EBI1,
+        .name = "pmem_adsp",
+        .allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
+        .cached = 1,
 };
 
 static struct platform_device android_pmem_adsp_device = {
-	.name = "android_pmem",
-	.id = 2,
-	.dev = { .platform_data = &android_pmem_adsp_pdata },
+        .name = "android_pmem",
+        .id = 2,
+        .dev = { .platform_data = &android_pmem_adsp_pdata },
 };
 
 static struct android_pmem_platform_data android_pmem_audio_pdata = {
-	.name = "pmem_audio",
-	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
-	.cached = 0,
-	.memory_type = MEMTYPE_EBI1,
+        .name = "pmem_audio",
+        .allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
+        .cached = 0,
 };
 
 static struct platform_device android_pmem_audio_device = {
-	.name = "android_pmem",
-	.id = 4,
-	.dev = { .platform_data = &android_pmem_audio_pdata },
+        .name = "android_pmem",
+        .id = 4,
+        .dev = { .platform_data = &android_pmem_audio_pdata },
 };
 
 #define PMEM_BUS_WIDTH(_bw) \
-	{ \
-		.vectors = &(struct msm_bus_vectors){ \
-			.src = MSM_BUS_MASTER_AMPSS_M0, \
-			.dst = MSM_BUS_SLAVE_SMI, \
-			.ib = (_bw), \
-			.ab = 0, \
-		}, \
-	.num_paths = 1, \
-	}
+        { \
+                .vectors = &(struct msm_bus_vectors){ \
+                        .src = MSM_BUS_MASTER_AMPSS_M0, \
+                        .dst = MSM_BUS_SLAVE_SMI, \
+                        .ib = (_bw), \
+                        .ab = 0, \
+                }, \
+        .num_paths = 1, \
+        }
 static struct msm_bus_paths pmem_smi_table[] = {
-	[0] = PMEM_BUS_WIDTH(0), /* Off */
-	[1] = PMEM_BUS_WIDTH(1), /* On */
+        [0] = PMEM_BUS_WIDTH(0), /* Off */
+        [1] = PMEM_BUS_WIDTH(1), /* On */
 };
 
 static struct msm_bus_scale_pdata smi_client_pdata = {
-	.usecase = pmem_smi_table,
-	.num_usecases = ARRAY_SIZE(pmem_smi_table),
-	.name = "pmem_smi",
+        .usecase = pmem_smi_table,
+        .num_usecases = ARRAY_SIZE(pmem_smi_table),
+        .name = "pmem_smi",
 };
 
 void pmem_request_smi_region(void *data)
 {
-	int bus_id = (int) data;
+        int bus_id = (int) data;
 
-	msm_bus_scale_client_update_request(bus_id, 1);
+        msm_bus_scale_client_update_request(bus_id, 1);
 }
 
 void pmem_release_smi_region(void *data)
 {
-	int bus_id = (int) data;
+        int bus_id = (int) data;
 
-	msm_bus_scale_client_update_request(bus_id, 0);
+        msm_bus_scale_client_update_request(bus_id, 0);
 }
 
 void *pmem_setup_smi_region(void)
@@ -3134,77 +3142,48 @@ void *pmem_setup_smi_region(void)
         return (void *)msm_bus_scale_register_client(&smi_client_pdata);
 }
 
-static struct android_pmem_platform_data android_pmem_smipool_pdata = {
-	.name = "pmem_smipool",
-	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
-	.cached = 1,
-	.memory_type = MEMTYPE_SMI,
-	.request_region = pmem_request_smi_region,
-	.release_region = pmem_release_smi_region,
-	.setup_region = pmem_setup_smi_region,
-	.map_on_demand = 1,
-};
-
-static struct platform_device android_pmem_smipool_device = {
-	.name = "android_pmem",
-	.id = 7,
-	.dev = { .platform_data = &android_pmem_smipool_pdata },
-};
-#endif	/* CONFIG_ANDROID_PMEM */
-
-
+#ifdef CONFIG_ION_MSM
+#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static int request_smi_region(void *data)
 {
-  int bus_id = (int) data;
-  msm_bus_scale_client_update_request(bus_id, 1);
-  return 0;
+        pmem_request_smi_region(data);
+
+        return 0;
 }
 
 static int release_smi_region(void *data)
 {
-  int bus_id = (int) data;
-  msm_bus_scale_client_update_request(bus_id, 0);
-  return 0;
+        pmem_release_smi_region(data);
+
+        return 0;
 }
 
-void *setup_smi_region(void)
-{
-  return (void *)msm_bus_scale_register_client(&smi_client_pdata);
-}
-
-#ifdef CONFIG_ION_MSM
-#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
-  .permission_type = IPT_TYPE_MM_CARVEOUT,
-  .align = PAGE_SIZE,
-  .request_region = request_smi_region,
-  .release_region = release_smi_region,
-  .setup_region = setup_smi_region,
-};
-
-static struct ion_co_heap_pdata fw_co_ion_pdata = {
-  .adjacent_mem_id = ION_CP_MM_HEAP_ID,
-  .align = SZ_128K,
-};
-
-
-static struct ion_co_heap_pdata co_ion_pdata = {
-  .adjacent_mem_id = INVALID_HEAP_ID,
-  .align = PAGE_SIZE,
+        .permission_type = IPT_TYPE_MM_CARVEOUT,
+        .align = PAGE_SIZE,
+        .request_region = request_smi_region,
+        .release_region = release_smi_region,
+        .setup_region = pmem_setup_smi_region,
 };
 
 static struct ion_cp_heap_pdata cp_wb_ion_pdata = {
         .permission_type = IPT_TYPE_MDP_WRITEBACK,
         .align = PAGE_SIZE,
 };
-#endif
 
-/*
- * These heaps are listed in the order they will be allocated.
- * Don't swap the order unless you know what you are doing!
- */
+static struct ion_co_heap_pdata fw_co_ion_pdata = {
+        .adjacent_mem_id = ION_CP_MM_HEAP_ID,
+        .align = SZ_128K,
+};
+
+static struct ion_co_heap_pdata co_ion_pdata = {
+        .adjacent_mem_id = INVALID_HEAP_ID,
+        .align = PAGE_SIZE,
+};
+
+#endif
 static struct ion_platform_data ion_pdata = {
-.nr = MSM_ION_HEAP_NUM,
+        .nr = MSM_ION_HEAP_NUM,
         .heaps = {
                 {
                         .id        = ION_SYSTEM_HEAP_ID,
@@ -3212,38 +3191,37 @@ static struct ion_platform_data ion_pdata = {
                         .name        = ION_VMALLOC_HEAP_NAME,
                 },
                 {
-			.id  = ION_CP_MM_HEAP_ID,
-			.type  = ION_HEAP_TYPE_CP,
-			.name  = ION_MM_HEAP_NAME,
-			.base  = MSM_ION_MM_BASE,
-			.size  = MSM_ION_MM_SIZE,
-			.memory_type = ION_SMI_TYPE,
-			.extra_data = (void *) &cp_mm_ion_pdata,
-		},
-     		{
-
-			.id  = ION_MM_FIRMWARE_HEAP_ID,
-			.type  = ION_HEAP_TYPE_CARVEOUT,
-			.name  = ION_MM_FIRMWARE_HEAP_NAME,
-			.base  = MSM_ION_MM_FW_BASE,
-			.size  = MSM_ION_MM_FW_SIZE,
-			.memory_type = ION_SMI_TYPE,
-			.extra_data = (void *) &fw_co_ion_pdata,
-		},
-		{
+                        .id        = ION_CP_MM_HEAP_ID,
+                        .type        = ION_HEAP_TYPE_CP,
+                        .name        = ION_MM_HEAP_NAME,
+                        .base        = MSM_ION_MM_BASE,
+                        .size        = MSM_ION_MM_SIZE,
+                        .memory_type = ION_SMI_TYPE,
+                        .extra_data = (void *) &cp_mm_ion_pdata,
+                },
+                {
+                        .id        = ION_MM_FIRMWARE_HEAP_ID,
+                        .type        = ION_HEAP_TYPE_CARVEOUT,
+                        .name        = ION_MM_FIRMWARE_HEAP_NAME,
+                        .base        = MSM_ION_MM_FW_BASE,
+                        .size        = MSM_ION_MM_FW_SIZE,
+                        .memory_type = ION_SMI_TYPE,
+                        .extra_data = (void *) &fw_co_ion_pdata,
+                },
+                {
                         .id        = ION_SF_HEAP_ID,
                         .type        = ION_HEAP_TYPE_CARVEOUT,
                         .name        = ION_SF_HEAP_NAME,
-                        .base   = MSM_ION_SF_BASE,
+                        .base        = MSM_ION_SF_BASE,
                         .size        = MSM_ION_SF_SIZE,
                         .memory_type = ION_EBI_TYPE,
-                        .extra_data = (void *)&co_ion_pdata,
+                        .extra_data = (void *) &co_ion_pdata,
                 },
                 {
                         .id        = ION_CP_WB_HEAP_ID,
                         .type        = ION_HEAP_TYPE_CP,
-                        .base        = MSM_ION_WB_BASE,
                         .name        = ION_WB_HEAP_NAME,
+                        .base        = MSM_ION_WB_BASE,
                         .size        = MSM_ION_WB_SIZE,
                         .memory_type = ION_EBI_TYPE,
                         .extra_data = (void *) &cp_wb_ion_pdata,
@@ -3253,16 +3231,11 @@ static struct ion_platform_data ion_pdata = {
 };
 
 static struct platform_device ion_dev = {
-  .name = "ion-msm",
-  .id = 1,
-  .dev = { .platform_data = &ion_pdata },
+        .name = "ion-msm",
+        .id = 1,
+        .dev = { .platform_data = &ion_pdata },
 };
-
-static struct resource msm_fb_resources[] = {
-	{
-		.flags  = IORESOURCE_DMA,
-	}
-};
+#endif
 
 #ifdef CONFIG_FB_MSM_HDMI_MSM_PANEL
 static struct resource hdmi_msm_resources[] = {
@@ -3305,6 +3278,22 @@ static struct platform_device hdmi_msm_device = {
 	.dev.platform_data = &hdmi_msm_data,
 };
 #endif /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
+
+static struct android_pmem_platform_data android_pmem_smipool_pdata = {
+        .name = "pmem_smipool",
+        .allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
+        .cached = 1,
+        .memory_type = MEMTYPE_SMI,
+        .request_region = pmem_request_smi_region,
+        .release_region = pmem_release_smi_region,
+        .setup_region = pmem_setup_smi_region,
+        .map_on_demand = 1,
+};
+static struct platform_device android_pmem_smipool_device = {
+        .name = "android_pmem",
+        .id = 7,
+        .dev = { .platform_data = &android_pmem_smipool_pdata },
+};
 
 static void __init msm8x60_allocate_memory_regions(void)
 {

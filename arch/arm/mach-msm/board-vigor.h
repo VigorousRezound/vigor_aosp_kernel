@@ -16,6 +16,7 @@
 #define __ARCH_ARM_MACH_MSM_BOARD_VIGOR_H
 
 #include <mach/board.h>
+#include <mach/msm_memtypes.h>
 
 #define VIGOR_PROJECT_NAME	"vigor"
 
