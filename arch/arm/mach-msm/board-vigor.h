@@ -59,7 +59,7 @@
 #endif /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
 
 /*** Memory map ***/
-#define MSM_ION_HEAP_NUM 4
+#define MSM_ION_HEAP_NUM 5
 
 // PMEM SMI
 #define MSM_SMI_SIZE 0x4000000
@@ -73,11 +73,11 @@
 
 // ION SMI
 #define MSM_ION_MM_SIZE 0x3400000 /* 52MB */
-#define MSM_SMI_ION_SIZE 0x3200000 /* 50MB */
 
 // ION
-#define MSM_ION_WB_SIZE 0x600000 /* 6MB */
+#define MSM_ION_WB_SIZE 0x800000 /* 8MB */
 #define MSM_ION_SF_SIZE 0x4000000 /* 64MB */
+#define MSM_ION_MM_FW_SIZE 0x200000 /* 2MB */
 
 // Base addresses
 #define MSM_SMI_BASE (0x38000000)
@@ -85,10 +85,10 @@
 #define USER_SMI_BASE (KERNEL_SMI_BASE + KERNEL_SMI_SIZE)
 #define MSM_PMEM_SMIPOOL_BASE USER_SMI_BASE
 #define MSM_ION_SF_BASE (0x78C00000)
-#define MSM_ION_WB_BASE (0x78600000)
+#define MSM_ION_WB_BASE (0x78400000)
 #define MSM_PMEM_AUDIO_BASE (MSM_PMEM_ADSP_BASE + MSM_PMEM_ADSP_SIZE)
 #define MSM_ION_MM_BASE (0x7CC00000)
-#define MSM_SMI_ION_BASE (0x7CC00000)
+#define MSM_ION_MM_FW_BASE (0x78200000)
 #define MSM_PMEM_ADSP_BASE 0x40400000
 
 /* PHY_BASE_ADDR1 should be 8 MB alignment */
@@ -98,7 +98,7 @@
 /* 0x42A00000~0x48800000 is 94MB Reserved for something */
 /* 0x48800000~0x7CC00000 is 836MB for APP */
 /* 0x7CC00000~0x80000000 is 52MB for ADSP PMEM */
-#define SIZE_ADDR1	  0x2FE00000
+#define SIZE_ADDR1	  0x2FA00000
 /*** END Memory map ***/
 
 /* GPIO definition */
