@@ -87,7 +87,6 @@
 #include <mach/htc_bdaddress.h>
 #include <mach/htc_sleep_clk.h>
 #endif
-#include <mach/htc_usb.h>
 #include <mach/gpiomux.h>
 #ifdef CONFIG_MSM_DSPS
 #include <mach/msm_dsps.h>
@@ -103,7 +102,7 @@
 #include <linux/i2c/isl9519.h>
 #include <mach/tpa2051d3.h>
 #ifdef CONFIG_USB_G_ANDROID
-#include <linux/usb/android_composite.h>
+#include <linux/usb/android.h>
 #include <mach/usbdiag.h>
 #endif
 #include <linux/regulator/consumer.h>
