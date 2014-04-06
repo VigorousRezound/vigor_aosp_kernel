@@ -78,7 +78,7 @@ static s32 vid_enc_get_empty_client_index(void)
 
 u32 vid_enc_get_status(u32 status)
 {
-	u32 venc_status;
+	u32 venc_status;
 
 	switch (status) {
 	case VCD_S_SUCCESS:
