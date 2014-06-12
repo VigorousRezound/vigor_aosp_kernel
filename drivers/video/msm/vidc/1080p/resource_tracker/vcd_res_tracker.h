@@ -14,7 +14,7 @@
 #define _VIDEO_720P_RESOURCE_TRACKER_H_
 
 #include <linux/regulator/consumer.h>
-#include <linux/ion.h>
+#include <linux/msm_ion.h>
 #include "vcd_res_tracker_api.h"
 #ifdef CONFIG_MSM_BUS_SCALING
 #include <mach/msm_bus.h>
@@ -41,9 +41,6 @@ struct res_trk_context {
 	unsigned int perf_level;
 	struct regulator *footswitch;
 	struct msm_vidc_platform_data *vidc_platform_data;
-	int memtype;
-	int fw_mem_type;
-	int cmd_mem_type;
 #ifdef CONFIG_MSM_BUS_SCALING
 	struct msm_bus_scale_pdata *vidc_bus_client_pdata;
 	uint32_t     pcl;
@@ -57,6 +54,7 @@ struct res_trk_context {
 	u32 mmu_clks_on;
 	u32 secure_session;
 	struct mutex secure_lock;
+	u32 sec_clk_heap;
 };
 
 #if DEBUG

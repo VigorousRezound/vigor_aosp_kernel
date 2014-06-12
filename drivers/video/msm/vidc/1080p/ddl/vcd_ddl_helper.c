@@ -10,12 +10,12 @@
  * GNU General Public License for more details.
  *
  */
-
-#include <linux/ion.h>
+#include <linux/msm_ion.h>
 #include <mach/msm_memtypes.h>
 #include "vcd_ddl.h"
 #include "vcd_ddl_shared_mem.h"
 #include "vcd_res_tracker_api.h"
+
 
 struct ddl_context *ddl_get_context(void)
 {
@@ -257,7 +257,7 @@ u32 ddl_decoder_dpb_init(struct ddl_client_context *ddl)
 				memset(frame[i].vcd_frm.virtual + luma_size,
 					 0x80808080,
 					frame[i].vcd_frm.alloc_len - luma_size);
-				if (frame[i].vcd_frm.ion_flag == CACHED) {
+				if (frame[i].vcd_frm.ion_flag == 1) {
 					msm_ion_do_cache_op(
 					ddl_context->video_ion_client,
 					frame[i].vcd_frm.buff_ion_handle,
@@ -382,8 +382,6 @@ void ddl_release_client_internal_buffers(struct ddl_client_context *ddl)
 		encoder->dynamic_prop_change = 0;
 		ddl_free_enc_hw_buffers(ddl);
 	}
-	ddl_pmem_free(&ddl->shared_mem[0]);
-	ddl_pmem_free(&ddl->shared_mem[1]);
 }
 
 u32 ddl_codec_type_transact(struct ddl_client_context *ddl,
@@ -999,8 +997,7 @@ u32 ddl_check_reconfig(struct ddl_client_context *ddl)
 			(decoder->frame_size.scan_lines ==
 			decoder->client_frame_size.scan_lines) &&
 			(decoder->frame_size.stride ==
-			decoder->client_frame_size.stride) &&
-			decoder->progressive_only)
+			decoder->client_frame_size.stride))
 				need_reconfig = false;
 	}
 	return need_reconfig;

@@ -984,4 +984,3 @@ void vcd_set_is_encoding(bool encoding)
 {
   res_trk_set_is_encoding(encoding);
 }
-

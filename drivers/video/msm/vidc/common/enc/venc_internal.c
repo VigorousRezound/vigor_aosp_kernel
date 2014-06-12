@@ -934,7 +934,7 @@ u32 vid_enc_set_get_entropy_cfg(struct video_client_ctx *client_ctx,
 	vcd_property_hdr.sz =
 		sizeof(struct vcd_property_entropy_control);
 	if (set_flag) {
-		switch (entropy_cfg->entropysel) {
+		switch (entropy_cfg->longentropysel) {
 		case VEN_ENTROPY_MODEL_CAVLC:
 			control.entropy_sel = VCD_ENTROPY_SEL_CAVLC;
 			break;
@@ -987,11 +987,11 @@ u32 vid_enc_set_get_entropy_cfg(struct video_client_ctx *client_ctx,
 		} else {
 			switch (control.entropy_sel) {
 			case VCD_ENTROPY_SEL_CABAC:
-				entropy_cfg->entropysel =
+				entropy_cfg->cabacmodel =
 					VEN_ENTROPY_MODEL_CABAC;
 				break;
 			case VCD_ENTROPY_SEL_CAVLC:
-				entropy_cfg->entropysel =
+				entropy_cfg->cabacmodel =
 					VEN_ENTROPY_MODEL_CAVLC;
 				break;
 			default:
@@ -1694,7 +1694,7 @@ u32 vid_enc_encode_frame(struct video_client_ctx *client_ctx,
 				&buff_handle);
 
 		if (vcd_input_buffer.data_len > 0) {
-			if (ion_flag == CACHED) {
+			if (ion_flag == 1) {
 				msm_ion_do_cache_op(
 				client_ctx->user_ion_client,
 				buff_handle,
@@ -1822,7 +1822,7 @@ u32 vid_enc_set_recon_buffers(struct video_client_ctx *client_ctx,
 			control->client_data = (void *) mapped_buffer;
 			control->dev_addr = (u8 *)mapped_buffer->iova[0];
 	} else {
-		client_ctx->recon_buffer_ion_handle[i] = ion_import_fd(
+		client_ctx->recon_buffer_ion_handle[i] = ion_import_dma_buf(
 				client_ctx->user_ion_client, control->pmem_fd);
 		if (IS_ERR_OR_NULL(client_ctx->recon_buffer_ion_handle[i])) {
 			ERR("%s(): get_ION_handle failed\n", __func__);
@@ -1838,8 +1838,7 @@ u32 vid_enc_set_recon_buffers(struct video_client_ctx *client_ctx,
 		}
 		control->kernel_virtual_addr = (u8 *) ion_map_kernel(
 			client_ctx->user_ion_client,
-			client_ctx->recon_buffer_ion_handle[i],
-			ionflag);
+			client_ctx->recon_buffer_ion_handle[i]);
 		if (!control->kernel_virtual_addr) {
 			ERR("%s(): get_ION_kernel virtual addr fail\n",
 				 __func__);
@@ -1868,7 +1867,7 @@ u32 vid_enc_set_recon_buffers(struct video_client_ctx *client_ctx,
 					0,
 					(unsigned long *)&iova,
 					(unsigned long *)&buffer_size,
-					UNCACHED, 0);
+					0, 0);
 			if (rc) {
 				ERR("%s():ION map iommu addr fail\n",
 					 __func__);

@@ -23,11 +23,6 @@
 #endif
 static unsigned int run_cnt;
 
-/* MMRND_AVRC. Start */
-#define QCIF_WIDTH   176
-#define QCIF_HEIGHT  144
-/* MMRND_AVRC. End */
-
 void ddl_vidc_core_init(struct ddl_context *ddl_context)
 {
 	struct vidc_1080P_pix_cache_config pixel_cache_config;
@@ -207,13 +202,6 @@ void ddl_vidc_decode_init_codec(struct ddl_client_context *ddl)
 	vidc_1080p_set_decode_mpeg4_pp_filter(decoder->post_filter.post_filter);
 	vidc_sm_set_concealment_color(&ddl->shared_mem[ddl->command_channel],
 		DDL_CONCEALMENT_Y_COLOR, DDL_CONCEALMENT_C_COLOR);
-
-	vidc_sm_set_error_concealment_config(
-		&ddl->shared_mem[ddl->command_channel],
-		VIDC_SM_ERR_CONCEALMENT_INTER_SLICE_MB_COPY,
-		VIDC_SM_ERR_CONCEALMENT_INTRA_SLICE_COLOR_CONCEALMENT,
-		VIDC_SM_ERR_CONCEALMENT_ENABLE);
-
 	ddl_vidc_metadata_enable(ddl);
 	vidc_sm_set_metadata_start_address(&ddl->shared_mem
 		[ddl->command_channel],
@@ -582,21 +570,11 @@ void ddl_vidc_encode_init_codec(struct ddl_client_context *ddl)
 		(DDL_FRAMERATE_SCALE(DDL_INITIAL_FRAME_RATE)
 		 != scaled_frame_rate))
 		h263_cpfc_enable = true;
-
-/* MMRND_AVRC. Start */
-/* added for MMS plus header issue */
-    if ((encoder->codec.codec == VCD_CODEC_H263) &&
-        (encoder->frame_size.width == QCIF_WIDTH) &&
-        (encoder->frame_size.height == QCIF_HEIGHT))
-            h263_cpfc_enable = false;
-/* MMRND_AVRC. End */
-
 	vidc_sm_set_extended_encoder_control(&ddl->shared_mem
 		[ddl->command_channel], hdr_ext_control,
 		r_cframe_skip, false, 0,
 		h263_cpfc_enable, encoder->sps_pps.sps_pps_for_idr_enable_flag,
-		encoder->closed_gop,
-		encoder->bitstream_restrict_enable);
+		encoder->closed_gop);
 	vidc_sm_set_encoder_init_rc_value(&ddl->shared_mem
 		[ddl->command_channel],
 		encoder->target_bit_rate.target_bitrate);

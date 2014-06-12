@@ -400,7 +400,7 @@ void vidc_cleanup_addr_table(struct video_client_ctx *client_ctx,
 				enum buffer_dir buffer)
 {
 	u32 *num_of_buffers = NULL;
-	u32 i = 0, len = 0;
+	u32 i = 0;
 	struct buf_addr_table *buf_addr_table;
 	if (buffer == BUFFER_TYPE_INPUT) {
 		buf_addr_table = client_ctx->input_buf_addr_table;
@@ -446,38 +446,6 @@ void vidc_cleanup_addr_table(struct video_client_ctx *client_ctx,
 			}
 		}
 	}
-	len = sizeof(client_ctx->recon_buffer)/
-		sizeof(struct vcd_property_enc_recon_buffer);
-	for (i = 0; i < len; i++) {
-		if (!vcd_get_ion_status()) {
-			if (client_ctx->recon_buffer[i].client_data) {
-				msm_subsystem_unmap_buffer(
-				(struct msm_mapped_buffer *)
-				client_ctx->recon_buffer[i].client_data);
-				client_ctx->recon_buffer[i].client_data = NULL;
-			}
-		} else  {
-			if (!IS_ERR_OR_NULL(
-				client_ctx->recon_buffer_ion_handle[i])) {
-				ion_unmap_kernel(client_ctx->user_ion_client,
-				client_ctx->recon_buffer_ion_handle[i]);
-				if (!res_trk_check_for_sec_session() &&
-				   (res_trk_get_core_type() !=
-					(u32)VCD_CORE_720P)) {
-					ion_unmap_iommu(client_ctx->
-						user_ion_client,
-						client_ctx->
-						recon_buffer_ion_handle[i],
-						VIDEO_DOMAIN,
-						VIDEO_MAIN_POOL);
-				}
-				ion_free(client_ctx->user_ion_client,
-				client_ctx->recon_buffer_ion_handle[i]);
-				client_ctx->recon_buffer_ion_handle[i] = NULL;
-			}
-		}
-	}
-
 	if (client_ctx->vcd_h264_mv_buffer.client_data) {
 		msm_subsystem_unmap_buffer((struct msm_mapped_buffer *)
 		client_ctx->vcd_h264_mv_buffer.client_data);
@@ -659,7 +627,7 @@ u32 vidc_insert_addr_table(struct video_client_ctx *client_ctx,
 			buf_addr_table[*num_of_buffers].dev_addr =
 				mapped_buffer->iova[0];
 		} else {
-			buff_ion_handle = ion_import_fd(
+			buff_ion_handle = ion_import_dma_buf(
 				client_ctx->user_ion_client, pmem_fd);
 			if (IS_ERR_OR_NULL(buff_ion_handle)) {
 				ERR("%s(): get_ION_handle failed\n",
@@ -676,8 +644,7 @@ u32 vidc_insert_addr_table(struct video_client_ctx *client_ctx,
 			*kernel_vaddr = (unsigned long)
 				ion_map_kernel(
 				client_ctx->user_ion_client,
-				buff_ion_handle,
-				ionflag);
+				buff_ion_handle);
 			if (IS_ERR_OR_NULL((void *)*kernel_vaddr)) {
 				ERR("%s():ION virtual addr fail\n",
 				 __func__);
@@ -707,7 +674,7 @@ u32 vidc_insert_addr_table(struct video_client_ctx *client_ctx,
 						length,
 						(unsigned long *) &iova,
 						(unsigned long *) &buffer_size,
-						UNCACHED,
+						0,
 						ION_IOMMU_UNMAP_DELAYED);
 				if (ret) {
 					ERR("%s():ION iommu map fail\n",
