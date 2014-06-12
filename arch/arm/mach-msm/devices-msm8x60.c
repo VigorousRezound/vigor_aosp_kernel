@@ -2692,11 +2692,9 @@ struct msm_vidc_platform_data vidc_platform_data = {
 	.vidc_bus_client_pdata = &vidc_bus_client_data,
 #endif
 	.enable_ion = 1,
-	.secure_wb_heap = 0,
+	.cp_enabled = 0,
 	.disable_dmx = 0,
-	.disable_fullhd = 0,
-	.cont_mode_dpb_count = 8,
-	.disable_turbo = 1,
+  .disable_fullhd = 0
 };
 
 struct platform_device msm_device_vidc = {
@@ -2956,7 +2954,7 @@ struct platform_device asoc_mvs_dai1 = {
 
 struct platform_device *msm_footswitch_devices[] = {
 	FS_8X60(FS_IJPEG,	"fs_ijpeg"),
-	FS_8X60(FS_MDP,	"fs_mdp"),
+	 /*FS_8X60(FS_MDP,       "fs_mdp"),*//*re-enable when find out why mdp_p can't turn off*/
 	FS_8X60(FS_ROT,	"fs_rot"),
 	FS_8X60(FS_VED,	"fs_ved"),
 	FS_8X60(FS_VFE,	"fs_vfe"),
