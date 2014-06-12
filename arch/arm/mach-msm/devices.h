@@ -1,7 +1,7 @@
 /* linux/arch/arm/mach-msm/devices.h
  *
  * Copyright (C) 2008 Google, Inc.
- * Copyright (c) 2009-2011, Code Aurora Forum. All rights reserved.
+ * Copyright (c) 2009-2012, Code Aurora Forum. All rights reserved.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -25,6 +25,9 @@ void __init msm9615_device_init(void);
 void __init msm9615_map_io(void);
 void __init msm_map_msm9615_io(void);
 void __init msm9615_init_irq(void);
+void __init msm_rotator_update_bus_vectors(unsigned int xres,
+	unsigned int yres);
+void __init msm_rotator_set_split_iommu_domain(void);
 
 extern struct platform_device asoc_msm_pcm;
 extern struct platform_device asoc_msm_dai0;
@@ -135,6 +138,10 @@ extern struct platform_device msm_device_tssc;
 
 extern struct platform_device msm_rotator_device;
 
+#ifdef CONFIG_MSM_BUS_SCALING
+extern struct msm_bus_scale_pdata rotator_bus_scale_pdata;
+#endif
+
 extern struct platform_device msm_device_tsif[2];
 
 extern struct platform_device msm_device_ssbi_pmic1;
@@ -175,6 +182,8 @@ extern struct platform_device msm_cpudai_afe_01_tx;
 extern struct platform_device msm_cpudai_afe_02_rx;
 extern struct platform_device msm_cpudai_afe_02_tx;
 extern struct platform_device msm_pcm_afe;
+
+extern struct platform_device msm_pil_q6v3;
 
 extern struct platform_device *msm_footswitch_devices[];
 extern unsigned msm_num_footswitch_devices;
@@ -226,6 +235,5 @@ extern struct platform_device msm9615_device_watchdog;
 extern struct platform_device msm_etb_device;
 extern struct platform_device msm_tpiu_device;
 extern struct platform_device msm_funnel_device;
-extern struct platform_device msm_debug_device;
 extern struct platform_device msm_ptm_device;
 #endif
