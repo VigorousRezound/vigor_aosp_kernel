@@ -770,6 +770,7 @@ config MACH_VIGOR
 	depends on ARCH_MSM8X60
 	default n
 	bool "Vigor"
+	select FB_MSM_MIPI_DSI
 	help
 	  Support for the Vigor device.
 
