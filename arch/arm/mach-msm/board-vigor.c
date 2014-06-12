@@ -342,8 +342,6 @@ static void mhl_sii9234_1v2_power(bool enable);
 	}							\
 } while (0)
 
-int __init vigor_init_panel(struct resource *res, size_t size);
-
 #ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_2_PHASE
 int set_two_phase_freq(int cpufreq);
 #endif
@@ -3037,15 +3035,6 @@ static void __init msm8x60_init_dsps(void)
 }
 #endif /* CONFIG_MSM_DSPS */
 
-
-static unsigned fb_size;
-static int __init fb_size_setup(char *p)
-{
-	fb_size = memparse(p, NULL);
-	return 0;
-}
-early_param("fb_size", fb_size_setup);
-
 #ifdef CONFIG_ANDROID_PMEM
 static unsigned pmem_adsp_size = MSM_PMEM_ADSP_SIZE;
 
@@ -3297,7 +3286,7 @@ static struct platform_device android_pmem_smipool_device = {
 static void __init msm8x60_allocate_memory_regions(void)
 {
 		void *addr;
-	unsigned long size;
+	vigor_allocate_fb_region();
 
         size = MSM_FB_SIZE;
         addr = alloc_bootmem_align(size, 0x1000);
@@ -7684,12 +7673,21 @@ static void __init reserve_ion_memory(void)
 //Do Nothing
 }
 
+static void __init reserve_mdp_memory(void)
+{
+	vigor_mdp_writeback(msm8x60_reserve_table);
+}
+
+static void __init reserve_mdp_memory(void);
+
+
 #ifdef CONFIG_ION_MSM
 static void __init msm8x60_calculate_reserve_sizes(void)
 {
 	size_pmem_devices();
 	reserve_pmem_memory();
 	reserve_ion_memory();
+	reserve_mdp_memory();
 }
 #endif
 
@@ -7911,7 +7909,7 @@ static void __init msm8x60_init(struct msm_board_data *board_data)
 
 	platform_add_devices(charm_devices, ARRAY_SIZE(charm_devices));
 
-	vigor_init_panel(msm_fb_resources, ARRAY_SIZE(msm_fb_resources));
+	vigor_init_fb();
 
 	fixup_i2c_configs();
 	register_i2c_devices();

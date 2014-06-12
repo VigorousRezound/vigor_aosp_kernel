@@ -255,9 +255,15 @@
 #define VIGOR_PS_INT			PMGPIO(35)
 #define VIGOR_WIFI_BT_SLEEP_CLK  PMGPIO(38)
 
+extern int panel_type;
+
 int __init vigor_init_mmc(void);
 void __init vigor_audio_init(void);
 int __init vigor_init_keypad(void);
 int __init vigor_wifi_init(void);
+void vigor_init_fb(void);
+void vigor_allocate_fb_region(void);
+void __init vigor_mdp_writeback(struct memtype_reserve* reserve_table);
+void __init msm_fb_add_devices(void);
 
 #endif /* __ARCH_ARM_MACH_MSM_BOARD_VIGOR_H */
