@@ -3141,4 +3141,4 @@ module_exit(msm_rotator_exit);
 
 MODULE_DESCRIPTION("MSM Offline Image Rotator driver");
 MODULE_VERSION("1.0");
-MODULE_LICENSE("GPL v2")
+MODULE_LICENSE("GPL v2");
