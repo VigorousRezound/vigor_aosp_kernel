@@ -10,7 +10,7 @@ time_start=$(date +%s.%N)
 # Number of jobs (usually the number of cores your CPU has (if Hyperthreading count each core as 2))
 MAKE="6"
 
-## Build kernel using shooter_defconfig
+## Build kernel vigor_aosp_defconfig
 export CROSS_COMPILE=$HOME/toolchains/arm-eabi-4.7/bin/arm-eabi-
 export ARCH=arm
 make vigor_aosp_defconfig
@@ -36,7 +36,7 @@ cp arch/arm/boot/zImage Packages/out/kernel/
 # build flashable zip
      export curdate=`date "+%d-%m-%Y-%H%M"`
      cd Packages/out/
-     zip -r ../shooteru-kernel-$curdate.zip .
+     zip -r ../vigor-kernel-$curdate.zip .
      echo "Deleting Temp files and folders...."
      cd ../../
      rm -rf Packages/out/

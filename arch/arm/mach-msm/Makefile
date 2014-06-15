@@ -434,6 +434,7 @@ obj-$(CONFIG_MACH_HOLIDAY) += board-holiday-mmc.o board-holiday-wifi.o
 obj-$(CONFIG_MACH_VIGOR) += board-vigor.o mdm.o
 obj-$(CONFIG_MACH_VIGOR) += board-vigor-audio.o
 obj-$(CONFIG_MACH_VIGOR) += board-vigor-keypad.o
+obj-$(CONFIG_MACH_VIGOR) += board-vigor-display.o
 obj-$(CONFIG_MACH_VIGOR) += htc_bdaddress.o htc_sleep_clk.o board-vigor-rfkill.o htc_fmtx_rfkill.o htc_util.o
 obj-$(CONFIG_MACH_VIGOR) += board-vigor-mmc.o board-vigor-wifi.o
 obj-$(CONFIG_MACH_RUBY) += board-ruby.o mdm.o
